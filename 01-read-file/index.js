@@ -8,5 +8,5 @@ stream.on('data', chunk => {
   data += chunk; 
 });
 stream.on('end', () => {
-  console.log(data.trim())
-})
+  console.log(data.trim());
+});

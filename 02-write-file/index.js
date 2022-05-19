@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const EventEmitter = new require('events');
-const { stdout, stdin, exit } = process;
+const { stdin, exit } = process;
 const emitter = new EventEmitter();
 
 let filesArr;
@@ -21,7 +21,7 @@ emitter.on('filesLoaded', () => {
   console.log('Input data you want add to the file:');
   stdin.on('data', (data) => {
     if (data.toString().trim() === 'exit') {
-      console.log('Exitting the programm...')
+      console.log('Exitting the programm...');
       exit();
     }
     fs.appendFile(path.join(__dirname, 'text.txt'), data, (err) => {
@@ -32,5 +32,5 @@ emitter.on('filesLoaded', () => {
 
 process.on('SIGINT', () => { 
   console.log('\nExitting the programm...');
-  exit()
+  exit();
 });

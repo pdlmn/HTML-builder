@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs/promises');
-const { copyFile } = require('fs');
 const { dirname } = require('path/posix');
 
 const TEMPLATE_PATH = path.join(__dirname, 'template.html');
@@ -49,18 +48,18 @@ const bundleCSS = async (stylesDir) => {
 
 const copyFolder = async (srcDir, destDir) => {
   const assetFiles = await fs.readdir(srcDir, { 'withFileTypes': true });
-  const outputDir = await fs.readdir(path.join(__dirname, OUTPUT_DIR))
-  const dirName = destDir.split('/').at(-1)
+  const outputDir = await fs.readdir(path.join(__dirname, OUTPUT_DIR));
+  const dirName = destDir.split('/').at(-1);
 
   if (!outputDir.includes(dirName)) {
-    await fs.mkdir(destDir)
+    await fs.mkdir(destDir);
   }
 
   for (let file of assetFiles) {
     if (file.isDirectory()) {
-      copyFolder(path.join(srcDir, file.name), path.join(destDir, file.name))
+      copyFolder(path.join(srcDir, file.name), path.join(destDir, file.name));
     } else {
-      fs.copyFile(path.join(srcDir, file.name), path.join(destDir, file.name))
+      fs.copyFile(path.join(srcDir, file.name), path.join(destDir, file.name));
     }
   }
 
@@ -77,7 +76,7 @@ const build = async (destination) => {
   const bundledCSS = await bundleCSS(STYLES_DIR);
   fs.writeFile(path.join(__dirname, destination, 'index.html'), parsedHTML);
   fs.writeFile(path.join(__dirname, destination, 'style.css'), bundledCSS);
-  copyFolder(ASSETS_DIR, path.join(__dirname, destination, 'assets'))
+  copyFolder(ASSETS_DIR, path.join(__dirname, destination, 'assets'));
 };
 
 build(OUTPUT_DIR);

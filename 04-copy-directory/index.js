@@ -12,18 +12,18 @@ const copyDir = (files) => {
   fs.readdir(path.join(__dirname, 'files'), (err, files) => {
     files.forEach(file => {
       fs.copyFile(path.join(__dirname, 'files', file), path.join(__dirname, 'files-copy', file), (err) => {
-        if (err) throw err
-      })
-    })
-  })
+        if (err) throw err;
+      });
+    });
+  });
 };
 
 const init = () => {
   fs.readdir(__dirname, (err, files) => {
     emitter.emit('filesLoaded', files);
-  })
+  });
 
   emitter.on('filesLoaded', copyDir);
-}
+};
 
 init();
