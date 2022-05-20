@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs/promises');
-const { dirname } = require('path/posix');
 
 const TEMPLATE_PATH = path.join(__dirname, 'template.html');
 const COMPONENTS_DIR = path.join(__dirname, 'components');
@@ -41,28 +40,31 @@ const bundleCSS = async (stylesDir) => {
   for (let css of cssFiles) {
     const content = (await fs.readFile(path.join(stylesDir, css))).toString();
     bundle += content;
+    bundle += '\n'
   }
 
   return bundle;
 };
 
-const copyFolder = async (srcDir, destDir) => {
-  const assetFiles = await fs.readdir(srcDir, { 'withFileTypes': true });
-  const outputDir = await fs.readdir(path.join(__dirname, OUTPUT_DIR));
-  const dirName = destDir.split('/').at(-1);
+const copyFolder = async (src, dest) => {
+  const files = await fs.readdir(src, { withFileTypes: true })
 
-  if (!outputDir.includes(dirName)) {
-    await fs.mkdir(destDir);
+  // creates folder if not exists
+  let access
+  try {
+    access = await fs.access(path.join(dest))
+  } catch {
+    fs.mkdir(dest)
   }
 
-  for (let file of assetFiles) {
+  // copies all files from src to dest
+  for (let file of files) {
     if (file.isDirectory()) {
-      copyFolder(path.join(srcDir, file.name), path.join(destDir, file.name));
+      await copyFolder(path.join(src, file.name), path.join(dest, file.name))
     } else {
-      fs.copyFile(path.join(srcDir, file.name), path.join(destDir, file.name));
+      await fs.copyFile(path.join(src, file.name), path.join(dest, file.name))
     }
   }
-
 };
 
 const build = async (destination) => {
@@ -72,11 +74,16 @@ const build = async (destination) => {
     await fs.mkdir(path.join(__dirname, destination));
   }
 
-  const parsedHTML = await parseHTML(TEMPLATE_PATH, COMPONENTS_DIR);
-  const bundledCSS = await bundleCSS(STYLES_DIR);
-  fs.writeFile(path.join(__dirname, destination, 'index.html'), parsedHTML);
-  fs.writeFile(path.join(__dirname, destination, 'style.css'), bundledCSS);
-  copyFolder(ASSETS_DIR, path.join(__dirname, destination, 'assets'));
+  try {
+    const parsedHTML = await parseHTML(TEMPLATE_PATH, COMPONENTS_DIR);
+    const bundledCSS = await bundleCSS(STYLES_DIR);
+    fs.writeFile(path.join(__dirname, destination, 'index.html'), parsedHTML);
+    fs.writeFile(path.join(__dirname, destination, 'style.css'), bundledCSS);
+    copyFolder(ASSETS_DIR, path.join(__dirname, destination, 'assets'));
+    console.log('All files are bundled!')
+  } catch {
+    console.log('Something went wrong...')
+  }
 };
 
 build(OUTPUT_DIR);
