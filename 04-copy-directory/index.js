@@ -15,6 +15,7 @@ const copyDir = (files) => {
         if (err) throw err;
       });
     });
+    console.log('Файлы успешно скопированы!');
   });
 };
 

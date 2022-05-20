@@ -14,7 +14,8 @@ const makeBundle = async () => {
     content += '\n';
   }
   content = content.trim();
-  fs.writeFile(path.join(__dirname, 'project-dist','bundle.css'), content);
+  await fs.writeFile(path.join(__dirname, 'project-dist','bundle.css'), content);
+  console.log('Бандл успешно создан!');
 };
 
 makeBundle();
