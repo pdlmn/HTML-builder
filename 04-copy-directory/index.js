@@ -3,25 +3,20 @@ const fs = require('fs');
 const EventEmitter = require('events');
 const emitter = new EventEmitter();
 
-const cleanDir = (files) => {
-  if (!files.includes('files-copy')) {
-    fs.mkdir(path.join(__dirname, 'files-copy'), (err) => {
-      if (err) throw err;
-    });
-  } else {
-    fs.readdir(path.join(__dirname, 'files-copy'), (err, files) => {
-      files.forEach(file => {
-        fs.unlink(path.join(__dirname, 'files-copy', file), (err) => {
-          if (err) {
-            console.log(err);
-          }
-        });
+const cleanDir = () => {
+  fs.rm(
+    path.join(__dirname, 'files-copy'),
+    { force: true, recursive: true },
+    (err) => {
+      if (err) console.log(err);
+      fs.mkdir(path.join(__dirname, 'files-copy'), (err) => {
+        if (err) throw err;
+        emitter.emit('directoryCreated');
       });
     });
-  }
 };
 
-const copyDir = (files) => {
+const copyDir = () => {
   fs.readdir(path.join(__dirname, 'files'), (err, files) => {
     files.forEach(file => {
       fs.copyFile(path.join(__dirname, 'files', file), path.join(__dirname, 'files-copy', file), (err) => {
@@ -38,11 +33,10 @@ const init = () => {
   });
 
   emitter.on('filesLoaded', (files) => {
-    cleanDir(files);
-    emitter.emit('directoryCreated', files);
+    cleanDir();
   });
 
-  emitter.on('filesLoaded', copyDir);
+  emitter.on('directoryCreated', copyDir);
 };
 
 init();
